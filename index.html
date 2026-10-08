@@ -4,8 +4,8 @@
 <!-- Built by PROTOTYPES/tools/build_single.py from PROTOTYPES/3-accord — edit the sources, not this file. -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>The Fragrance Room · Fragrance, Jamaica</title>
-<meta name="description" content="Designer and Arabian fragrances in Jamaica, browsed by note. Choose, then order on WhatsApp.">
+<title>The Fragrance Room · Designer & Arabian fragrances</title>
+<meta name="description" content="Designer and Arabian fragrances, browsed by note. Choose, then order on WhatsApp.">
 <meta name="theme-color" content="#f7f6f2">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -318,7 +318,7 @@ button { cursor: pointer; }
   <section class="hero">
     <div class="fd-wrap">
       <div>
-        <span class="small-caps">Fragrance · Jamaica</span>
+        <span class="small-caps">Designer · Arabian</span>
         <h1>Notes that <em>belong</em> together.</h1>
         <p>Designer and Arabian fragrances you can browse the way perfumers think — by note, by family, by house. Pick yours, then send your order on WhatsApp.</p>
         <div class="btns">
@@ -399,12 +399,12 @@ button { cursor: pointer; }
 
   <footer>
     <div class="fd-wrap">
-      <div class="foot__brand"><span class="foot__mark" data-brand-mark="76"></span><span class="logo__word" data-brand="word">The Fragrance Room</span><p>Designer and Arabian fragrances, Jamaica. Orders and questions on WhatsApp.</p></div>
+      <div class="foot__brand"><span class="foot__mark" data-brand-mark="76"></span><span class="logo__word" data-brand="word">The Fragrance Room</span><p>Designer and Arabian fragrances. Orders and questions on WhatsApp.</p></div>
       <div><h3>Shop</h3><button data-go-tab="new">New arrivals</button><button data-go-tab="arabian">Arabian</button><button data-go-tab="women">Women</button><button data-go-tab="men">Men</button><button data-go-tab="sets">Gift sets</button></div>
       <div><h3>Discover</h3><a href="#notes">Index of notes</a><a href="#families">Families</a><a href="#houses">Houses</a><button data-fd="open-help">Help me choose</button></div>
       <div><h3>Contact</h3><a data-fd="chat-link" href="#">WhatsApp</a><span>+1 (876) 436-5300</span></div>
     </div>
-    <div class="fd-wrap foot__end">© 2026 <span data-brand="name">The Fragrance Room</span> · Jamaica</div>
+    <div class="fd-wrap foot__end">© 2026 <span data-brand="name">The Fragrance Room</span></div>
   </footer>
 
   <script>
@@ -977,7 +977,7 @@ window.NOTES={"23":{"f":"Oriental Spicy","y":2025,"t":["Mandarin"],"m":["Pepper"
       <path d="${MONOGRAM}" fill="currentColor"/></svg>`;
     document.querySelectorAll("[data-brand]").forEach(el => { el.textContent = BRAND[el.dataset.brand]; });
     document.querySelectorAll("[data-brand-mark]").forEach((el, i) => { el.innerHTML = emblem(+el.dataset.brandMark, "brand-ring-" + i); });
-    document.title = BRAND.name + " · Fragrance, Jamaica";
+    document.title = BRAND.name + " · Designer & Arabian fragrances";
 
     const menuBtn = document.querySelector("[data-menu]"), menu = document.getElementById("menu");
     menuBtn.addEventListener("click", () => { menu.hidden = !menu.hidden; menuBtn.setAttribute("aria-expanded", !menu.hidden); menuBtn.textContent = menu.hidden ? "Menu" : "Close"; });
