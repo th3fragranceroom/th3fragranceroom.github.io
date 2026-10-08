@@ -263,7 +263,37 @@ button { cursor: pointer; }
 
   .shop { padding: 30px 0 48px; }
   .fd-tabs { gap: 20px; }
-  .shop .fd-tabs { position: sticky; top: 58px; z-index: 6; background: var(--bg); border-bottom: 1px solid var(--line); }
+  .shop__bar { position: sticky; top: 58px; z-index: 6; display: flex; align-items: center; gap: 14px; margin: 0 -16px; padding: 0 16px; background: var(--bg); border-bottom: 1px solid var(--line); }
+  .shop__bar .fd-tabs { flex: 1; min-width: 0; margin: 0; padding: 2px 0 0; }
+
+  /* THE FILTER BAR — notes, families, houses: slides in from the left on phones, a column beside the collection on computers */
+  .fd-filter-btn { flex: none; display: inline-flex; align-items: center; gap: 7px; min-height: 34px; padding: 0 12px; border: 1px solid var(--fg); border-radius: 6px; background: var(--fg); color: var(--bg); font: 500 13px var(--font-body); }
+  .filters { position: fixed; z-index: 40; top: 0; bottom: 0; left: 0; width: min(86vw, 360px); overflow-y: auto; padding: 0 18px 40px; background: var(--bg); border-right: 1px solid var(--line); transform: translateX(-102%); visibility: hidden; transition: transform .25s ease, visibility .25s; }
+  .filters.is-open { transform: none; visibility: visible; box-shadow: 0 0 40px rgba(22, 22, 22, .18); }
+  .filters__back { position: fixed; inset: 0; z-index: 39; background: rgba(22, 22, 22, .35); }
+  .filters__head { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; height: 58px; margin: 0 -18px; padding: 0 18px; background: var(--bg); border-bottom: 1px solid var(--line); }
+  .filters__head h3 { margin: 0; font: 400 28px/1 var(--font-display); }
+  .filters__x { width: 40px; height: 40px; border: 1px solid var(--line); border-radius: 50%; background: none; font-size: 22px; line-height: 1; }
+  .filters__group { padding: 0 0 12px; border-bottom: 1px solid var(--line); }
+  .filters__group summary { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 16px 0 8px; cursor: pointer; list-style: none; font: 400 24px/1 var(--font-display); }
+  .filters__group summary::-webkit-details-marker { display: none; }
+  .filters__group summary small { font: 400 12px var(--font-body); color: var(--muted); }
+  .filters .index { columns: 1; }
+  .filters .index .fd-note { min-height: 34px; padding: 5px 0; font-size: 17px; }
+  .filters .fams { display: block; }
+  .filters .fams .fd-fam { display: flex; width: 100%; align-items: baseline; justify-content: space-between; min-height: 36px; border-bottom: 1px solid var(--line); font-size: 19px; text-align: left; }
+  .filters .fams .fd-fam small { vertical-align: baseline; }
+  .filters__find { width: 100%; min-height: 40px; margin: 0 0 6px; padding: 0 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--field); font-size: 14px; }
+  .fd-hl { display: flex; width: 100%; align-items: baseline; justify-content: space-between; gap: 8px; min-height: 34px; padding: 5px 0; border: 0; border-bottom: 1px solid var(--line); background: none; font-size: 15px; text-align: left; }
+  .fd-hl small { font-size: 12px; color: var(--muted); }
+  .filters [aria-pressed="true"] span { font-style: italic; text-decoration: underline; text-underline-offset: 4px; }
+  .filters .fd-hl[aria-pressed="true"] { font-weight: 600; }
+  @media (min-width: 960px) {
+    .shop__layout { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 36px; align-items: start; }
+    .filters { position: sticky; top: 74px; z-index: auto; width: auto; max-height: calc(100vh - 90px); padding: 0 8px 24px 0; border-right: 0; transform: none; visibility: visible; transition: none; }
+    .filters__head { position: static; height: auto; margin: 0; padding: 4px 0 6px; }
+    .filters__x, .fd-filter-btn, .filters__back { display: none !important; }
+  }
   .fd-tab { border: 0; border-radius: 0; padding: 8px 0; background: none; color: var(--muted); font-size: 14px; border-bottom: 1px solid transparent; }
   .fd-tab[aria-pressed="true"] { background: none; color: var(--fg); border-bottom-color: var(--fg); }
   .fd-search, .fd-select { border-radius: 6px; background-color: #fff; }
@@ -317,15 +347,15 @@ button { cursor: pointer; }
       <nav class="nav">
         <button class="menu-btn" data-menu aria-expanded="false" aria-controls="menu">Menu</button>
         <a class="hide-s" href="#shop">Collection</a>
-        <a class="hide-s" href="#notes">Notes</a>
-        <a class="hide-s" href="#houses">Houses</a>
+        <button class="hide-s" data-filters-open="f-notes">Notes</button>
+        <button class="hide-s" data-filters-open="f-houses">Houses</button>
         <button class="hide-s" data-fd="open-help">Help me choose</button>
         <button data-fd="open-bag">Bag<span data-fd="bag-count" hidden>0</span></button>
       </nav>
     </div>
     <div class="menu" id="menu" hidden>
       <div class="fd-wrap">
-        <a href="#shop">Collection</a><a href="#notes">Index of notes</a><a href="#families">Families</a><a href="#houses">Houses</a>
+        <a href="#shop">Collection</a><button data-filters-open="f-notes">Notes</button><button data-filters-open="f-families">Families</button><button data-filters-open="f-houses">Houses</button>
         <button data-fd="open-help">Help me choose</button><a data-fd="chat-link" href="#">WhatsApp +1 (876) 436-5300</a>
       </div>
     </div>
@@ -338,7 +368,7 @@ button { cursor: pointer; }
         <h1>Notes that <em>belong</em> together.</h1>
         <p>Designer and Arabian fragrances you can browse the way perfumers think — by note, by family, by house. Pick yours, then send your order on WhatsApp.</p>
         <div class="btns">
-          <a class="btn" href="#notes">Browse by note</a>
+          <button class="btn" data-filters-open="f-notes">Browse by note</button>
           <button class="btn btn--line" data-fd="open-help">Help me choose</button>
         </div>
         <div class="facts"><span><b data-fd-total>6,700+</b> fragrances</span><span><b data-fd-count-of="brands">547</b> houses</span><span><b data-fd-count-of="notes">—</b> notes indexed</span></div>
@@ -358,47 +388,36 @@ button { cursor: pointer; }
     </div>
   </section>
 
-  <section class="block" id="notes">
-    <div class="fd-wrap">
-      <div class="sec"><h2><span class="sec__num">ii.</span>Index of notes</h2><small>A–Z</small></div>
-      <p class="lede">Every fragrance is built from notes — the top you smell first, the heart, and the base that stays. Choose one to see every fragrance that carries it.</p>
-      <div class="index" data-fd="notes" data-layout="index" data-limit="48"></div>
-    </div>
-  </section>
-
-  <section class="block" id="families">
-    <div class="fd-wrap">
-      <div class="sec"><h2><span class="sec__num">iii.</span>Families</h2><small>How a scent feels</small></div>
-      <div class="fams" data-fd="families"></div>
-    </div>
-  </section>
-
-  <section class="block">
-    <div class="fd-wrap">
-      <div class="sec"><h2><span class="sec__num">iv.</span>New <i>this season</i></h2><small>Just arrived</small></div>
-      <div class="fd-rail" data-fd-rail="new" data-limit="12"></div>
-    </div>
-  </section>
-
-  <section class="block" id="houses">
-    <div class="fd-wrap">
-      <div class="sec"><h2><span class="sec__num">v.</span>Houses</h2><small><span data-fd-count-of="brands">547</span> in all</small></div>
-      <div class="fd-houses" data-fd="houses" data-limit="8"></div>
-    </div>
-  </section>
-
   <section class="shop" id="shop">
     <div class="fd-wrap">
-      <div class="sec"><h2><span class="sec__num">vi.</span>Collection</h2><small data-fd="count"></small></div>
-      <nav class="fd-tabs" data-fd="tabs" aria-label="Categories"></nav>
-      <div class="fd-tools">
-        <input class="fd-search" data-fd="search" type="search" placeholder="Search by name, house, size or note" aria-label="Search">
-        <select class="fd-select" data-fd="brand" aria-label="House"></select>
-        <select class="fd-select" data-fd="sort" aria-label="Sort"></select>
+      <div class="sec"><h2><span class="sec__num">ii.</span>Collection</h2><small data-fd="count"></small></div>
+      <div class="shop__layout">
+        <aside class="filters" id="filters" aria-label="Filter">
+          <div class="filters__head"><h3>Filter</h3><button type="button" class="filters__x" data-filters-close aria-label="Close">×</button></div>
+          <details class="filters__group" id="f-notes" open><summary>Notes <small>by what you smell</small></summary>
+            <div class="index" data-fd="notes" data-layout="index" data-limit="48"></div></details>
+          <details class="filters__group" id="f-families" open><summary>Families <small>how a scent feels</small></summary>
+            <div class="fams" data-fd="families"></div></details>
+          <details class="filters__group" id="f-houses" open><summary>Houses <small><span data-fd-count-of="brands">528</span> in all</small></summary>
+            <input class="filters__find" data-fd="houses-find" type="search" placeholder="Find a house" aria-label="Find a house">
+            <div class="filters__houses" data-fd="houses-list"></div></details>
+        </aside>
+        <div class="shop__main">
+          <div class="shop__bar">
+            <button type="button" class="fd-filter-btn" data-filters-open aria-controls="filters" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h12M4 8h8M6 12h4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>Filter</button>
+            <nav class="fd-tabs" data-fd="tabs" aria-label="Categories"></nav>
+          </div>
+          <div class="fd-tools">
+            <input class="fd-search" data-fd="search" type="search" placeholder="Search by name, house, size or note" aria-label="Search">
+            <select class="fd-select" data-fd="brand" aria-label="House"></select>
+            <select class="fd-select" data-fd="sort" aria-label="Sort"></select>
+          </div>
+          <div class="fd-active" data-fd="active" hidden></div>
+          <div class="fd-grid" data-fd="grid"></div>
+          <button class="fd-more" data-fd="more">Load more</button>
+        </div>
       </div>
-      <div class="fd-active" data-fd="active" hidden></div>
-      <div class="fd-grid" data-fd="grid"></div>
-      <button class="fd-more" data-fd="more">Load more</button>
+      <div class="filters__back" data-filters-back hidden></div>
     </div>
   </section>
 
@@ -417,7 +436,7 @@ button { cursor: pointer; }
     <div class="fd-wrap">
       <div class="foot__brand"><span class="foot__mark" data-brand-mark="76"></span><span class="logo__word" data-brand="word">The Fragrance Room</span><p>Designer and Arabian fragrances. Orders and questions on WhatsApp.</p></div>
       <div><h3>Shop</h3><button data-go-tab="new">New arrivals</button><button data-go-tab="arabian">Arabian</button><button data-go-tab="women">Women</button><button data-go-tab="men">Men</button><button data-go-tab="sets">Gift sets</button></div>
-      <div><h3>Discover</h3><a href="#notes">Index of notes</a><a href="#families">Families</a><a href="#houses">Houses</a><button data-fd="open-help">Help me choose</button></div>
+      <div><h3>Discover</h3><button data-filters-open="f-notes">Notes</button><button data-filters-open="f-families">Families</button><button data-filters-open="f-houses">Houses</button><button data-fd="open-help">Help me choose</button></div>
       <div><h3>Contact</h3><a data-fd="chat-link" href="#">WhatsApp</a><span>+1 (876) 436-5300</span></div>
     </div>
     <div class="fd-wrap foot__end">© 2026 <span data-brand="name">The Fragrance Room</span></div>
@@ -441,6 +460,7 @@ window.NOTES={"23":{"f":"Oriental Spicy","y":2025,"t":["Mandarin"],"m":["Pepper"
      [data-fd=tabs] [data-fd=search] [data-fd=brand] [data-fd=sort] [data-fd=count] [data-fd=active]
      [data-fd=grid] [data-fd=more] [data-fd=featured] [data-fd=bag-count] [data-fd=open-bag] [data-fd=open-help]
      [data-fd=chat-link] [data-fd=notes data-limit data-layout=index] [data-fd=families] [data-fd=houses data-limit]
+     [data-fd=houses-list] (every house, A–Z, with counts) + [data-fd=houses-find] (a box that narrows it)
      [data-fd-rail="new|arabian|sets|men|women|brand:<name>|note:<name>" data-limit]
      <img data-fd-pick="Brand|Name|ml">  [data-fd-total]  [data-fd-count-of="notes|arabian|brands|facts"]
    Any element with data-go-tab / data-go-note / data-go-brand / data-go-fam sets that filter and jumps to the grid.
@@ -623,6 +643,10 @@ window.NOTES={"23":{"f":"Oriental Spicy","y":2025,"t":["Mandarin"],"m":["Pepper"
       el.innerHTML = chips.map(([k, l]) => `<button class="fd-chip" data-clear="${k}">${esc(l)} <span aria-hidden="true">×</span></button>`).join("") +
         (chips.length > 1 ? `<button class="fd-link" data-clear="all">Clear all</button>` : "");
     });
+    // the choice that is on, marked in the note / family / house lists
+    $$("[data-fd=notes] [data-go-note]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.goNote === S.note)));
+    $$("[data-fd=families] [data-go-fam]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.goFam === S.fam)));
+    $$("[data-fd=houses-list] [data-go-brand]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.goBrand === S.brand)));
   }
   function renderGrid() {
     const grid = $("[data-fd=grid]");
@@ -658,6 +682,10 @@ window.NOTES={"23":{"f":"Oriental Spicy","y":2025,"t":["Mandarin"],"m":["Pepper"
         const x = ORDERED.find(y => y.b === b && y.img && !y.t && y.k === "perfume");
         return `<button class="fd-house" data-go-brand="${esc(b)}">${x ? `<span class="fd-house__img"><img loading="lazy" src="${esc(imgUrl(x, 300))}" alt=""></span>` : ""}<b>${esc(b)}</b><small>${counts.get(b)} fragrances</small></button>`;
       }).join("");
+    });
+    $$("[data-fd=houses-list]").forEach(el => {
+      el.innerHTML = [...BRANDS].sort((a, b) => a[0].localeCompare(b[0])).map(([b, c]) =>
+        `<button class="fd-hl" data-go-brand="${esc(b)}"><span>${esc(b)}</span> <small>${c}</small></button>`).join("");
     });
     $$("[data-fd-count-of]").forEach(el => {
       const v = { notes: NOTE_LIST.length, arabian: DATA.filter(x => x.a).length, brands: BRANDS.length,
@@ -948,6 +976,11 @@ window.NOTES={"23":{"f":"Oriental Spicy","y":2025,"t":["Mandarin"],"m":["Pepper"
     }
     const brand = $("[data-fd=brand]");
     if (brand) brand.addEventListener("change", () => { S.brand = brand.value; S.shown = PAGE; renderGrid(); });
+    const findHouse = $("[data-fd=houses-find]");
+    if (findHouse) findHouse.addEventListener("input", () => {
+      const w = norm(findHouse.value);
+      $$("[data-fd=houses-list] [data-go-brand]").forEach(b => { b.hidden = !!w && !norm(b.dataset.goBrand).includes(w); });
+    });
     const sort = $("[data-fd=sort]");
     if (sort) sort.addEventListener("change", () => { S.sort = sort.value; S.shown = PAGE; renderGrid(); });
     const more = $("[data-fd=more]");
@@ -1011,6 +1044,33 @@ window.NOTES={"23":{"f":"Oriental Spicy","y":2025,"t":["Mandarin"],"m":["Pepper"
     if (location.hash === "#demo-menu") menuBtn.click();  // screenshots only
     menu.addEventListener("click", e => { if (e.target.closest("a, button")) { menu.hidden = true; menuBtn.setAttribute("aria-expanded", "false"); menuBtn.textContent = "Menu"; } });
 
+    // THE FILTER BAR — phones: slides in from the left; computers: always beside the collection
+    const filters = document.getElementById("filters"), back = document.querySelector("[data-filters-back]");
+    const wide = matchMedia("(min-width: 960px)");
+    const toPart = part => {
+      const g = part && document.getElementById(part);
+      if (!g) return;
+      g.open = true;
+      filters.scrollTop += g.getBoundingClientRect().top - filters.getBoundingClientRect().top - (wide.matches ? 0 : 58);
+    };
+    function openFilters(part) {
+      if (wide.matches) { document.getElementById("shop").scrollIntoView({ behavior: "smooth" }); toPart(part); return; }
+      filters.classList.add("is-open"); back.hidden = false; document.body.style.overflow = "hidden";
+      document.querySelectorAll("[data-filters-open]").forEach(b => b.setAttribute("aria-expanded", "true"));
+      toPart(part);
+    }
+    function closeFilters() {
+      filters.classList.remove("is-open"); back.hidden = true; document.body.style.overflow = "";
+      document.querySelectorAll("[data-filters-open]").forEach(b => b.setAttribute("aria-expanded", "false"));
+    }
+    document.addEventListener("click", e => {
+      const o = e.target.closest("[data-filters-open]");
+      if (o) { openFilters(o.dataset.filtersOpen); return; }
+      if (e.target.closest("[data-filters-close], [data-filters-back]")) closeFilters();
+      else if (!wide.matches && e.target.closest("#filters [data-go-note], #filters [data-go-fam], #filters [data-go-brand]")) closeFilters();
+    });
+    document.addEventListener("keydown", e => { if (e.key === "Escape" && filters.classList.contains("is-open")) closeFilters(); });
+
     FD.start({
       store: BRAND.name, greet: BRAND.greet, phone: BRAND.phone, cardNotes: 3,
       labels: { add: "Add", inBag: "Added", bag: "Bag", send: "Send order via WhatsApp", price: "Price on request",
@@ -1020,6 +1080,8 @@ window.NOTES={"23":{"f":"Oriental Spicy","y":2025,"t":["Mandarin"],"m":["Pepper"
         ["Valentino", "Born in Roma", 100], ["Lattafa", "Yara", 100], ["Versace", "Eros", 100],
         ["Afnan", "9PM Black", 100], ["Lattafa", "Asad", 100], ["Rasasi", "Hawas", 100]],
     });
+    if (location.hash.startsWith("#demo-filters"))  // screenshots only: #demo-filters, #demo-filters-families, #demo-filters-houses
+      requestAnimationFrame(() => openFilters("f-" + (location.hash.split("-")[2] || "notes")));
   </script>
 </body>
 </html>
