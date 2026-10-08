@@ -140,6 +140,9 @@ button { cursor: pointer; }
 .fd-chat { position: fixed; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom)); z-index: 30; display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; background: #25d366; color: #fff; box-shadow: 0 6px 20px rgba(0, 0, 0, .3); }
 .fd-toast { position: fixed; left: 50%; bottom: 90px; z-index: 60; transform: translate(-50%, 20px); opacity: 0; pointer-events: none; max-width: calc(100% - 32px); padding: 10px 16px; border-radius: 999px; background: var(--fg); color: var(--bg); font-size: 14px; font-weight: 600; transition: .2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .fd-toast.is-on { opacity: 1; transform: translate(-50%, 0); }
+.fd-toast--two { border-radius: 16px; text-align: center; }
+.fd-toast small { display: block; overflow: hidden; text-overflow: ellipsis; font-size: 13px; font-weight: 500; opacity: .85; }
+.fd-bundle { margin: 0 0 16px; padding: 10px 12px; border: 1px dashed var(--accent); border-radius: var(--field-radius, 10px); font-size: 14px; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .fd-toast { transition: none; } }
 
 /* ---- v2: facts, filters, houses, product view, matches ---- */
@@ -195,6 +198,9 @@ button { cursor: pointer; }
     --send-bg: #161616; --send-fg: #f7f6f2; --gap: 20px 12px;
   }
   body { font-size: 15px; }
+  /* the bundle strip (the owner's ask, 2026-10-08: more than one item → a bundle price) */
+  .promo { padding: 7px 16px; background: var(--fg); color: var(--bg); font-size: 12.5px; letter-spacing: .02em; text-align: center; }
+  .promo b { font-weight: 600; }
   .top { position: sticky; top: 0; z-index: 20; background: rgba(247, 246, 242, .94); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
   .top .fd-wrap { display: flex; align-items: center; justify-content: space-between; height: 58px; }
   .logo { display: flex; align-items: center; gap: 9px; color: var(--fg); text-decoration: none; }
@@ -211,6 +217,9 @@ button { cursor: pointer; }
   .menu a, .menu button { all: unset; cursor: pointer; padding: 12px 0; border-bottom: 1px solid var(--line); font: 400 26px/1.1 var(--font-display); }
   .menu a:last-child { border: 0; font: 500 14px var(--font-body); color: var(--muted); padding-top: 14px; }
   .nav [data-fd="bag-count"] { display: inline-block; margin-left: 4px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px; background: var(--fg); color: var(--bg); font-size: 11px; line-height: 20px; text-align: center; }
+  /* the floating bag, bottom left — the WhatsApp bubble's twin (the owner's ask, 2026-10-08) */
+  .bag-fab { position: fixed; left: 16px; bottom: calc(16px + env(safe-area-inset-bottom)); z-index: 30; display: grid; place-items: center; width: 56px; height: 56px; padding: 0; border: 0; border-radius: 50%; background: var(--fg); color: var(--bg); box-shadow: 0 6px 20px rgba(0, 0, 0, .3); }
+  .bag-fab [data-fd="bag-count"] { position: absolute; top: -4px; right: -4px; min-width: 22px; height: 22px; padding: 0 5px; border: 2px solid var(--fg); border-radius: 11px; background: var(--bg); color: var(--fg); font: 600 11px/18px var(--font-body); text-align: center; }
 
   .hero { padding: 36px 0 30px; }
   .hero .fd-wrap { display: grid; gap: 26px; }
@@ -305,7 +314,7 @@ button { cursor: pointer; }
   .filters .fd-hl[aria-pressed="true"] { font-weight: 600; }
   @media (min-width: 960px) {
     .shop__layout { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 36px; align-items: start; }
-    .filters { position: sticky; top: 74px; z-index: auto; width: auto; max-height: calc(100vh - 90px); padding: 0 8px 24px 0; border-right: 0; transform: none; visibility: visible; transition: none; }
+    .filters { position: sticky; top: 74px; z-index: auto; width: auto; max-height: calc(100vh - 90px); padding: 0 8px 84px 0; border-right: 0; transform: none; visibility: visible; transition: none; }  /* 84px: the last house scrolls clear of the floating bag */
     .filters__head { position: static; height: auto; margin: 0; padding: 4px 0 6px; }
     .filters__x, .fd-filter-btn, .filters__back { display: none !important; }
   }
@@ -353,6 +362,7 @@ button { cursor: pointer; }
 </style>
 </head>
 <body>
+  <div class="promo">Buying 2 or more? <b>Ask for a bundle price.</b></div>
   <header class="top">
     <div class="fd-wrap">
       <a class="logo" href="#" aria-label="The Fragrance Room — home">
@@ -456,6 +466,7 @@ button { cursor: pointer; }
     </div>
     <div class="fd-wrap foot__end">© 2026 <span data-brand="name">The Fragrance Room</span></div>
   </footer>
+  <button type="button" class="bag-fab" data-fd="open-bag" aria-label="Open your bag"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-.9 12.1a1 1 0 0 1-1 .9H6.9a1 1 0 0 1-1-.9L5 8Z"/><path d="M9 10V6.5a3 3 0 0 1 6 0V10"/></svg><span data-fd="bag-count" hidden>0</span></button>
 
   <script>
 window.IMG_BASE="photos/";window.IMG_LOCAL=true;
@@ -479,7 +490,8 @@ window.NOTES={"23":{"f":"Oriental Spicy","y":2025,"t":["Mandarin"],"m":["Pepper"
      [data-fd-rail="new|arabian|sets|men|women|brand:<name>|note:<name>" data-limit]
      <img data-fd-pick="Brand|Name|ml">  [data-fd-total]  [data-fd-count-of="notes|arabian|brands|facts"]
    Any element with data-go-tab / data-go-note / data-go-brand / data-go-fam sets that filter and jumps to the grid.
-   FD.start options: store, phone, featured, labels, cardNotes (n notes on each card), greet (opening line of every message; default "Hi <store>!").
+   FD.start options: store, phone, featured, labels, cardNotes (n notes on each card), greet (opening line of every message; default "Hi <store>!"),
+     bundle (n: from n items in the bag, the add pop-up, the bag and the message ask for a bundle price).
    Demo states for screenshots: #demo-bag #demo-msg #demo-help #demo-match #demo-view #demo-search=<words>
      #demo-note=<note> */
 (function () {
@@ -528,6 +540,8 @@ window.NOTES={"23":{"f":"Oriental Spicy","y":2025,"t":["Mandarin"],"m":["Pepper"
     helpTitle: "Help me choose", helpSend: "Show my matches", matchTitle: "Your matches",
     matchSend: "Send my answers on WhatsApp", sentNote: "WhatsApp opens with everything written. Just press send.",
     moreFrom: "More from", sizes: "Sizes", notes: "The notes", similar: "Shares notes with",
+    bundleToast: "{n} in your bag · ask for a bundle price", bundleBag: "{n} in your bag — your message asks for a bundle price.",
+    bundleMsg: "I'm getting {n}. Can I get a bundle price?",
   };
 
   const $ = (s, r = document) => r.querySelector(s);
@@ -768,11 +782,13 @@ window.NOTES={"23":{"f":"Oriental Spicy","y":2025,"t":["Mandarin"],"m":["Pepper"
   }
 
   // ---------- bag ----------
+  const bagN = () => S.bag.reduce((s, b) => s + b.q, 0);
+  const bundle = label => C.bundle && bagN() >= C.bundle ? label.replace("{n}", bagN()) : "";  // "" below the bundle size
   function add(id) {
     const hit = S.bag.find(b => b.i === id);
     if (hit) hit.q++; else S.bag.push({ i: id, q: 1 });
     saveBag(); refreshCards(); renderBag();
-    toast(`${L.inBag}: ${byId.get(id).n}`);
+    toast(`${L.inBag}: ${byId.get(id).n}`, bundle(L.bundleToast));
   }
   function setQty(id, q) {
     S.bag = S.bag.map(b => b.i === id ? { ...b, q } : b).filter(b => b.q > 0);
@@ -809,7 +825,7 @@ window.NOTES={"23":{"f":"Oriental Spicy","y":2025,"t":["Mandarin"],"m":["Pepper"
     const lines = S.bag.map((b, k) => { const x = byId.get(b.i); return `${k + 1}) ${lineFor(x)}  × ${b.q}${x.pr ? ` — ${money(x.pr * b.q)}` : ""}`; });
     const n = S.bag.reduce((s, b) => s + b.q, 0), tot = bagTotal();
     return [`${hi()} I'd like to order from your catalog:`, "", ...lines, "", `Items: ${n}`,
-      ...(tot.t ? [`Estimated total: ${money(tot.t)}${tot.open ? ` (+ ${tot.open} on request)` : ""}`] : []),
+      ...(tot.t ? [`Estimated total: ${money(tot.t)}${tot.open ? ` (+ ${tot.open} on request)` : ""}`] : []), ...(bundle(L.bundleMsg) ? [bundle(L.bundleMsg)] : []),
       `Name: ${f.name || "—"}`, f.note ? `Question: ${f.note}` : "", "",
       "Please confirm the prices and availability. Thank you!"].filter((l, k, a) => l !== "" || a[k - 1] !== "").join("\n");
   }
@@ -871,6 +887,7 @@ window.NOTES={"23":{"f":"Oriental Spicy","y":2025,"t":["Mandarin"],"m":["Pepper"
     panel.innerHTML = `<div class="fd-drawer__head"><h2>${esc(L.bag)}</h2><button type="button" class="fd-x" aria-label="Close">×</button></div>
       <div class="fd-drawer__body">
         ${S.bag.length ? `<ul class="fd-lines">${items}</ul>` : `<p class="fd-empty">${esc(L.empty)}</p>`}
+        ${bundle(L.bundleBag) ? `<p class="fd-bundle">${esc(bundle(L.bundleBag))}</p>` : ""}
         ${S.bag.length && bagTotal().t ? `<p class="fd-total">Estimated total <b>${esc(money(bagTotal().t))}</b>${bagTotal().open ? ` <span>+ ${bagTotal().open} on request</span>` : ""}</p>` : ""}
         ${S.bag.length ? `<form class="fd-form" novalidate>
           <h3 class="fd-form__title">Last step</h3>
@@ -977,10 +994,12 @@ window.NOTES={"23":{"f":"Oriental Spicy","y":2025,"t":["Mandarin"],"m":["Pepper"
 
   // ---------- toast ----------
   let toastEl, toastT;
-  function toast(msg) {
+  function toast(msg, sub) {  // sub: an optional second line (the bundle note)
     if (!toastEl) { toastEl = document.createElement("div"); toastEl.className = "fd-toast"; toastEl.setAttribute("role", "status"); document.body.append(toastEl); }
-    toastEl.textContent = msg; toastEl.classList.add("is-on");
-    clearTimeout(toastT); toastT = setTimeout(() => toastEl.classList.remove("is-on"), 1800);
+    toastEl.textContent = msg;
+    if (sub) { const s = document.createElement("small"); s.textContent = sub; toastEl.append(s); }
+    toastEl.classList.toggle("fd-toast--two", !!sub); toastEl.classList.add("is-on");
+    clearTimeout(toastT); toastT = setTimeout(() => toastEl.classList.remove("is-on"), sub ? 3000 : 1800);
   }
 
   // ---------- events ----------
@@ -1119,7 +1138,7 @@ window.NOTES={"23":{"f":"Oriental Spicy","y":2025,"t":["Mandarin"],"m":["Pepper"
     document.addEventListener("keydown", e => { if (e.key === "Escape" && filters.classList.contains("is-open")) closeFilters(); });
 
     FD.start({
-      store: BRAND.name, greet: BRAND.greet, phone: BRAND.phone, cardNotes: 3,
+      store: BRAND.name, greet: BRAND.greet, phone: BRAND.phone, cardNotes: 3, bundle: 2,
       labels: { add: "Add", inBag: "Added", bag: "Bag", send: "Send order via WhatsApp", price: "Price on request",
         matchTitle: "Your matches", moreFrom: "Also from", notes: "Composition" },
       featured: [["Maison Francis Kurkdjian", "Baccarat Rouge", 70], ["Lattafa", "Khamrah", 100], ["Christian Dior", "Sauvage", 100],
