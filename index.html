@@ -264,6 +264,18 @@ button { cursor: pointer; }
   .shop { padding: 30px 0 48px; }
   .fd-tabs { gap: 20px; }
   .shop__bar { position: sticky; top: 58px; z-index: 6; display: flex; align-items: center; gap: 14px; margin: 0 -16px; padding: 0 16px; background: var(--bg); border-bottom: 1px solid var(--line); }
+  /* pages under the collection */
+  .fd-pager { margin: 26px 0 6px; }
+  .fd-pages { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px; }
+  .fd-page { min-width: 38px; min-height: 38px; padding: 0 8px; border: 1px solid var(--line); border-radius: 6px; background: none; font-size: 14px; }
+  .fd-page[aria-current="page"] { background: var(--fg); border-color: var(--fg); color: var(--bg); font-weight: 600; }
+  .fd-page:disabled { opacity: .35; cursor: default; }
+  .fd-page__gap { min-width: 22px; text-align: center; color: var(--muted); }
+  .fd-page--nav span { display: none; }
+  @media (min-width: 560px) { .fd-page--nav span { display: inline; } .fd-page--nav { padding: 0 12px; } }
+  .fd-pageinfo { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 18px; margin-top: 12px; font-size: 13px; color: var(--muted); }
+  .fd-per button { margin-left: 4px; padding: 3px 8px; border: 1px solid transparent; border-radius: 4px; background: none; font-size: 13px; color: var(--fg); }
+  .fd-per button[aria-pressed="true"] { border-color: var(--fg); font-weight: 600; }
   .shop__bar .fd-tabs { flex: 1; min-width: 0; margin: 0; padding: 2px 0 0; }
 
   /* THE FILTER BAR — notes, families, houses: slides in from the left on phones, a column beside the collection on computers */
@@ -417,7 +429,7 @@ button { cursor: pointer; }
           </div>
           <div class="fd-active" data-fd="active" hidden></div>
           <div class="fd-grid" data-fd="grid"></div>
-          <button class="fd-more" data-fd="more">Load more</button>
+          <div class="fd-pager" data-fd="pager"></div>
         </div>
       </div>
       <div class="filters__back" data-filters-back hidden></div>
@@ -461,7 +473,7 @@ window.NOTES={"23":{"f":"Oriental Spicy","y":2025,"t":["Mandarin"],"m":["Pepper"
    facts per item id: f family, y year, p perfumer, t/m/b top/heart/base notes.
    Page hooks (all optional):
      [data-fd=tabs] [data-fd=search] [data-fd=brand] [data-fd=sort] [data-fd=count] [data-fd=active]
-     [data-fd=grid] [data-fd=more] [data-fd=featured] [data-fd=bag-count] [data-fd=open-bag] [data-fd=open-help]
+     [data-fd=grid] [data-fd=more] or [data-fd=pager] (pages of 25 / 50 / all instead of "load more") [data-fd=featured] [data-fd=bag-count] [data-fd=open-bag] [data-fd=open-help]
      [data-fd=chat-link] [data-fd=notes data-limit data-layout=index] [data-fd=families] [data-fd=houses data-limit]
      [data-fd=houses-list] (every house, A–Z, with counts) + [data-fd=houses-find] (a box that narrows it)
      [data-fd-rail="new|arabian|sets|men|women|brand:<name>|note:<name>" data-limit]
@@ -570,7 +582,7 @@ window.NOTES={"23":{"f":"Oriental Spicy","y":2025,"t":["Mandarin"],"m":["Pepper"
 
   // ---------- state ----------
   let C = {}, L = DEFAULT_LABELS, KEY = "fd_bag";
-  const S = { tab: "all", brand: "", note: "", fam: "", sort: "featured", q: "", shown: PAGE, bag: [] };
+  const S = { tab: "all", brand: "", note: "", fam: "", sort: "featured", q: "", shown: PAGE, page: 1, per: 25, bag: [] };
 
   function results() {
     const tab = TABS.find(t => t.id === S.tab) || TABS[0];
@@ -655,13 +667,43 @@ window.NOTES={"23":{"f":"Oriental Spicy","y":2025,"t":["Mandarin"],"m":["Pepper"
     const grid = $("[data-fd=grid]");
     if (!grid) return;
     const list = results();
-    grid.innerHTML = list.length ? list.slice(0, S.shown).map(card).join("")
+    const pager = $("[data-fd=pager]");
+    let shown = list.slice(0, S.shown);
+    if (pager) {
+      const per = S.per || list.length || 1, pages = Math.max(1, Math.ceil(list.length / per));
+      S.page = Math.min(Math.max(1, S.page), pages);
+      const from = (S.page - 1) * per;
+      shown = list.slice(from, from + per);
+      renderPager(pager, list.length, pages, from, shown.length);
+    }
+    grid.innerHTML = list.length ? shown.map(card).join("")
       : `<p class="fd-empty">Nothing matches that yet. Try another word — or <button class="fd-link" data-fd="open-help">ask us on WhatsApp</button>.</p>`;
     $$("[data-fd=count]").forEach(c => { c.textContent = `${list.length.toLocaleString()} fragrance${list.length === 1 ? "" : "s"}`; });
     const more = $("[data-fd=more]");
-    if (more) more.hidden = S.shown >= list.length;
+    if (more) more.hidden = !!pager || S.shown >= list.length;
     renderActive();
   }
+  // pages: ‹ Prev 1 … 4 5 6 … 272 Next ›, "Showing 26–50 of 6,771", and Show 25 · 50 · All
+  function pageList(p, n) {
+    const keep = new Set([1, n, p - 1, p, p + 1, ...(p <= 3 ? [2, 3, 4] : []), ...(p >= n - 2 ? [n - 1, n - 2, n - 3] : [])]);
+    const ks = [...keep].filter(k => k >= 1 && k <= n).sort((a, b) => a - b), out = [];
+    ks.forEach((k, i) => { if (i && k - ks[i - 1] > 1) out.push(0); out.push(k); });
+    return out;
+  }
+  function renderPager(pager, total, pages, from, n) {
+    const nav = pages > 1 ? `<div class="fd-pages">
+        <button class="fd-page fd-page--nav" data-page="${S.page - 1}"${S.page === 1 ? " disabled" : ""} aria-label="Previous page">‹ <span>Prev</span></button>
+        ${pageList(S.page, pages).map(k => k ? `<button class="fd-page" data-page="${k}"${k === S.page ? ' aria-current="page"' : ""}>${k}</button>` : `<span class="fd-page__gap">…</span>`).join("")}
+        <button class="fd-page fd-page--nav" data-page="${S.page + 1}"${S.page === pages ? " disabled" : ""} aria-label="Next page"><span>Next</span> ›</button>
+      </div>` : "";
+    pager.innerHTML = total ? `${nav}<div class="fd-pageinfo"><span>Showing ${(from + 1).toLocaleString()}–${(from + n).toLocaleString()} of ${total.toLocaleString()}</span>
+        <span class="fd-per">Show ${[25, 50, 0].map(v => `<button data-per="${v}"${S.per === v ? ' aria-pressed="true"' : ""}>${v || "All"}</button>`).join("")}</span></div>` : "";
+  }
+  function toGrid() {
+    const g = $("[data-fd=grid]");
+    if (g) window.scrollTo({ top: g.getBoundingClientRect().top + window.scrollY - 140, behavior: "smooth" });
+  }
+
   function renderRails() {
     $$("[data-fd-rail]").forEach(el => { el.innerHTML = railItems(el.dataset.fdRail, +(el.dataset.limit || 12)).map(card).join(""); });
     const f = $("[data-fd=featured]");
@@ -717,7 +759,7 @@ window.NOTES={"23":{"f":"Oriental Spicy","y":2025,"t":["Mandarin"],"m":["Pepper"
     $$("[data-fd=bag-count]").forEach(el => { el.textContent = n; el.hidden = !n; });
   }
   function go(filter) {
-    Object.assign(S, { shown: PAGE }, filter);
+    Object.assign(S, { shown: PAGE, page: 1 }, filter);
     renderTabs(); renderGrid();
     const s = $("[data-fd=search]"); if (s) s.value = S.q;
     const b = $("[data-fd=brand]"); if (b) b.value = S.brand;
@@ -960,6 +1002,8 @@ window.NOTES={"23":{"f":"Oriental Spicy","y":2025,"t":["Mandarin"],"m":["Pepper"
       else if (t.matches("[data-fd=open-bag]")) openBag();
       else if (t.matches("[data-fd=open-help]")) openHelp();
       else if (t.matches("[data-fd=more]")) { S.shown += PAGE; renderGrid(); }
+      else if (d.page) { S.page = +d.page; renderGrid(); toGrid(); }
+      else if (d.per) { S.per = +d.per; S.page = 1; renderGrid(); toGrid(); }
       else if (t.classList.contains("fd-send") && panel.contains(t)) sendOrder();
       else if (t.classList.contains("fd-send--help") && lastHelp) openWhatsApp(helpMessage(lastHelp.f, lastHelp.picks));
       else if (t.classList.contains("fd-back") && lastHelp) openHelp(lastHelp.f);
@@ -975,20 +1019,20 @@ window.NOTES={"23":{"f":"Oriental Spicy","y":2025,"t":["Mandarin"],"m":["Pepper"
     const search = $("[data-fd=search]");
     if (search) {
       let t;
-      search.addEventListener("input", () => { clearTimeout(t); t = setTimeout(() => { S.q = search.value; S.shown = PAGE; renderGrid(); }, 120); });
+      search.addEventListener("input", () => { clearTimeout(t); t = setTimeout(() => { S.q = search.value; S.shown = PAGE; S.page = 1; renderGrid(); }, 120); });
     }
     const brand = $("[data-fd=brand]");
-    if (brand) brand.addEventListener("change", () => { S.brand = brand.value; S.shown = PAGE; renderGrid(); });
+    if (brand) brand.addEventListener("change", () => { S.brand = brand.value; S.shown = PAGE; S.page = 1; renderGrid(); });
     const findHouse = $("[data-fd=houses-find]");
     if (findHouse) findHouse.addEventListener("input", () => {
       const w = norm(findHouse.value);
       $$("[data-fd=houses-list] [data-go-brand]").forEach(b => { b.hidden = !!w && !norm(b.dataset.goBrand).includes(w); });
     });
     const sort = $("[data-fd=sort]");
-    if (sort) sort.addEventListener("change", () => { S.sort = sort.value; S.shown = PAGE; renderGrid(); });
+    if (sort) sort.addEventListener("change", () => { S.sort = sort.value; S.shown = PAGE; S.page = 1; renderGrid(); });
     const more = $("[data-fd=more]");
     if (more && "IntersectionObserver" in window) {
-      new IntersectionObserver(es => { if (es[0].isIntersecting && !more.hidden) { S.shown += PAGE; renderGrid(); } }, { rootMargin: "600px" }).observe(more);
+      if (!$("[data-fd=pager]")) new IntersectionObserver(es => { if (es[0].isIntersecting && !more.hidden) { S.shown += PAGE; renderGrid(); } }, { rootMargin: "600px" }).observe(more);
     }
   }
 
